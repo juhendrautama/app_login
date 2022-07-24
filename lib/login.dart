@@ -1,9 +1,9 @@
-// ignore_for_file: unnecessary_string_interpolations
-
+// ignore_for_file: unnecessary_string_interpolations, unnecessary_import
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import './api_login.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key key, this.title}) : super(key: key);
@@ -17,7 +17,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController userNameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  bool visible = false;
+  ProgressDialog progressDialog;
   String user;
   String pass;
   String pesan = '';
@@ -46,33 +46,46 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void prosesLogin(String user, String pass) async {
+    await progressDialog.show();
     setState(() {
-      user = userNameController.text;
-      pass = passwordController.text;
-    });
-    ApiLogin.login(user, pass).then((value) {
-      if (value.response == 1) {
-        saveSession(user);
-        pesan = value.pesan;
-      } else {
-        pesan = value.pesan;
-      }
+      ApiLogin.login(user, pass).then((value) {
+        if (value.response == 1) {
+          progressDialog.hide();
+          saveSession(user);
+          pesan = value.pesan;
+        } else if (value.response == 2) {
+          progressDialog.hide();
+          saveSession(user);
+          pesan = value.pesan;
+        } else {
+          progressDialog.hide();
+          saveSession(user);
+          pesan = value.pesan;
+        }
+      });
     });
   }
 
-  void reset() {
+  reset() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
+      prefs.remove("user");
       pesan = '';
+      userNameController.clear();
+      passwordController.clear();
     });
-    userNameController.clear();
-    passwordController.clear();
   }
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent, // status bar color
-    ));
+    progressDialog = ProgressDialog(
+      context,
+      type: ProgressDialogType.Normal,
+      textDirection: TextDirection.ltr,
+      isDismissible: false,
+    );
+    progressDialog.style(message: 'tunggu');
+
     return Scaffold(
         body: SingleChildScrollView(
       reverse: true,
