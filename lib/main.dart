@@ -1,9 +1,12 @@
+// ignore_for_file: unnecessary_new
+
 import 'package:flutter/material.dart';
-import 'package:intl/date_symbol_data_local.dart';
 import './login.dart';
+import './home.dart';
+import './launcher.dart';
 
 void main() {
-  initializeDateFormatting().then((_) => runApp(const MyApp()));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -11,9 +14,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginPage(),
+      home: const LauncherPage(),
+      routes: <String, WidgetBuilder>{
+        // ignore: prefer_const_constructors
+        '/login': (BuildContext context) => new LoginPage(),
+        '/home': (BuildContext context) => new HomePage(),
+      },
     );
   }
 }

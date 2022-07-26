@@ -1,9 +1,10 @@
-// ignore_for_file: unnecessary_string_interpolations, unnecessary_import
+// ignore_for_file: unnecessary_string_interpolations, unnecessary_import, avoid_print, unnecessary_const
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import './api_login.dart';
 import 'package:progress_dialog/progress_dialog.dart';
+import './home.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key key, this.title}) : super(key: key);
@@ -45,22 +46,55 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
+  dalletSession(
+    String user,
+  ) async {
+    prefs = await SharedPreferences.getInstance();
+    setState(() {
+      prefs.remove(user);
+    });
+  }
+
   void prosesLogin(String user, String pass) async {
     await progressDialog.show();
+    prefs = await SharedPreferences.getInstance();
     setState(() {
       ApiLogin.login(user, pass).then((value) {
         if (value.response == 1) {
           progressDialog.hide();
           saveSession(user);
-          pesan = value.pesan;
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) {
+            return HomePage();
+          }));
         } else if (value.response == 2) {
           progressDialog.hide();
-          saveSession(user);
+          dalletSession('user');
           pesan = value.pesan;
+          AlertDialog alert2 = AlertDialog(
+            title: const Text("Warning !!"),
+            content: Text("$pesan"),
+          );
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return alert2;
+            },
+          );
         } else {
           progressDialog.hide();
-          saveSession(user);
+          dalletSession('user');
           pesan = value.pesan;
+          AlertDialog alert2 = AlertDialog(
+            title: const Text("Warning !!"),
+            content: Text("$pesan"),
+          );
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return alert2;
+            },
+          );
         }
       });
     });
@@ -123,12 +157,7 @@ class _LoginPageState extends State<LoginPage> {
                         fontWeight: FontWeight.w600,
                         fontSize: 14.0),
                   )),
-              const SizedBox(height: 20.0),
 
-              Text(
-                "$pesan",
-                style: const TextStyle(fontSize: 20.0),
-              ),
               const SizedBox(height: 20.0),
               //Tombol
               Row(
@@ -136,8 +165,23 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      prosesLogin(
-                          userNameController.text, passwordController.text);
+                      if (userNameController.text.isEmpty ||
+                          passwordController.text.isEmpty) {
+                        AlertDialog alert = const AlertDialog(
+                          title: const Text("Warning !!"),
+                          content:
+                              const Text("Masukkan Username dan Password!"),
+                        );
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return alert;
+                          },
+                        );
+                      } else {
+                        prosesLogin(
+                            userNameController.text, passwordController.text);
+                      }
                     },
                     child: const Text("LOGIN"),
                   ),
