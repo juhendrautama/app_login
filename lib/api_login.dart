@@ -7,7 +7,8 @@ class ApiLogin {
   int response;
   String pesan;
 
-  ApiLogin({this.user, this.pass, this.response, this.pesan});
+  ApiLogin(
+      {this.user, this.pass, this.response, this.pesan}); //data yang di ambil;
   factory ApiLogin.createPost(Map<String, dynamic> object) {
     return ApiLogin(
         user: object['user'],
@@ -17,7 +18,7 @@ class ApiLogin {
   }
 
   static Future<ApiLogin> login(String user, String pass) async {
-    String baseURL = "https://sigadis-jambi.jambiprov.go.id/api/Login";
+    String baseURL = ""; //link api login nya
     var loginResult =
         await http.post(Uri.parse(baseURL), body: {"user": user, "pass": pass});
     var jsonObject = jsonDecode(loginResult.body);
